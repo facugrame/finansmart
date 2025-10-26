@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Transacciones - Finanzas</title>
+    <style>
+        body { font-family: Arial, sans-serif; font-size: 14px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #333; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+    </style>
+</head>
+<body>
+    <h2>Transacciones de {{ usuario.nombre_usuario }}</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Fecha</th>
+                <th>Descripción</th>
+                <th>Categoría</th>
+                <th>Tipo</th>
+                <th>Monto</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for t in transacciones %}
+            <tr>
+                <td>{{ t.fecha.strftime("%Y-%m-%d") }}</td>
+                <td>{{ t.descripcion }}</td>
+                <td>{{ t.categoria.nombre if t.categoria else '' }}</td>
+                <td>{{ t.tipo }}</td>
+                <td>{{ t.monto }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
