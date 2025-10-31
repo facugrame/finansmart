@@ -8,6 +8,8 @@
   <link href="{{ url_for('static', filename='css/agregar_transacciones.css') }}" rel="stylesheet" />
 </head>
 <body>
+
+
   <!--alertasss-->
 {% with messages = get_flashed_messages(with_categories=true) %}
   {% if messages %}
@@ -27,6 +29,8 @@
   <div class="container">
     <!--enlaces que uso para hacer referencia la vista-->
     <a class="navbar-brand" href="{{ url_for('panel') }}">FinanSmart</a>
+      
+       
     <div>
       <a href="{{ url_for('panel') }}" class="btn btn-light btn-sm">Volver al Dashboard</a>
     </div>

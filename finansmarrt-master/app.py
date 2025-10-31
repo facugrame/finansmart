@@ -40,6 +40,37 @@ app.config['MAIL_PASSWORD'] = 'zjan tkgy unuw zpeo'  # usa contraseña de app
 app.config['MAIL_DEFAULT_SENDER'] = ('Finansmarrt', 'facundo.marin.moscol@cftmail.cl')
 mail = Mail(app)
 
+
+
+@app.route('/guardar_meta', methods=['POST'])
+@login_required
+def guardar_meta():
+    tipo = request.form.get("tipo_meta")
+    meta = request.form.get("meta_ahorro", 0)
+
+    try:
+        meta = int(meta)
+    except:
+        flash("La meta debe ser un número válido.", "error")
+        return redirect(url_for('panel'))
+
+    if tipo == "mensual":
+        current_user.meta_ahorro_mensual = meta
+        current_user.tipo_meta = "mensual"
+    else:
+        current_user.meta_ahorro_anual = meta
+        current_user.tipo_meta = "anual"
+
+    current_user.notificado_ahorro = False
+    db.session.commit()
+
+    flash("✅ Meta actualizada", "success")
+    return redirect(url_for('panel'))
+
+
+
+
+
 # ================================
 # USUARIO LOGIN
 # ================================
@@ -151,9 +182,8 @@ def login():
 def cerrar_sesion():
     logout_user()
     return redirect(url_for('login'))
-
 # ================================
-# PANEL PRINCIPAL
+# PANEL PRINCIPAL (reemplazar)
 # ================================
 @app.route('/panel')
 @login_required
@@ -163,7 +193,31 @@ def panel():
     egresos = int(sum(t.monto for t in transacciones if t.tipo == 'Egreso'))
     saldo = ingresos - egresos
 
+    # Determinar qué meta usar (mensual o anual)
+    tipo_meta = getattr(current_user, 'tipo_meta', 'mensual') or 'mensual'
+    if tipo_meta == 'anual':
+        meta = getattr(current_user, 'meta_ahorro_anual', 0) or 0
+        # Si la meta anual está, calculamos progreso anual: puedes optar por comparar con ahorro anual,
+        # pero aquí usamos saldo total como simplificación (ajusta si guardas ahorro por año).
+    else:
+        meta = getattr(current_user, 'meta_ahorro_mensual', 0) or 0
+
+    ahorro_actual = saldo  # actualmente usas saldo global; si prefieres usar solo ingresos/egresos del mes, cambia aquí.
+
+    # Porcentaje y faltante
+    porcentaje_ahorro = 0
+    faltante = 0
+    if meta > 0:
+        porcentaje_ahorro = int((ahorro_actual / meta) * 100) if meta else 0
+        porcentaje_ahorro = max(0, min(porcentaje_ahorro, 100))
+        faltante = max(meta - ahorro_actual, 0)
+    else:
+        porcentaje_ahorro = 0
+        faltante = 0
+
     from collections import defaultdict
+
+    # Categorías de gasto
     categorias_gasto = defaultdict(float)
     for t in transacciones:
         if t.tipo == 'Egreso' and t.categoria:
@@ -184,19 +238,44 @@ def panel():
         meses_sorted = sorted(gastos_por_mes.keys())
         gastos_mensuales = np.array([gastos_por_mes[m] for m in meses_sorted])
         prediccion = int(np.mean(gastos_mensuales))
+
         mes_actual = datetime.now().strftime("%Y-%m")
         gasto_actual_mes = gastos_por_mes.get(mes_actual, 0)
+
         if gasto_actual_mes > prediccion * 1.5:
             alerta = f"¡Cuidado! Este mes has gastado ${gasto_actual_mes}, que es mayor al promedio histórico."
 
-    return render_template('panel.html',
-                           ingresos=ingresos,
-                           egresos=egresos,
-                           saldo=saldo,
-                           labels=labels,
-                           values=values,
-                           prediccion=prediccion,
-                           alerta=alerta)
+    # Envío de correo cuando se alcanza la meta (solo una vez)
+    try:
+        if meta > 0 and ahorro_actual >= meta and not getattr(current_user, 'notificado_ahorro', False):
+            asunto = "🎉 ¡Meta alcanzada en Finansmarrt!"
+            cuerpo = f"¡Felicitaciones {current_user.nombre_usuario}! Has alcanzado tu meta de ahorro ({tipo_meta}) de ${meta}.\n\nSaldo actual: ${ahorro_actual}"
+            msg = Message(asunto, recipients=[current_user.correo])
+            msg.body = cuerpo
+            mail.send(msg)
+
+            # Marcar como notificado para no repetir el email
+            current_user.notificado_ahorro = True
+            db.session.commit()
+    except Exception as e:
+        # No dejar que un fallo en el envío rompa la vista; loguea si quieres.
+        print("Error al enviar email de meta alcanzada:", e)
+
+    return render_template(
+        'panel.html',
+        ingresos=ingresos,
+        egresos=egresos,
+        saldo=saldo,
+        labels=labels,
+        values=values,
+        prediccion=prediccion,
+        alerta=alerta,
+        meta=meta,
+        tipo_meta=tipo_meta,
+        ahorro_actual=ahorro_actual,
+        porcentaje_ahorro=porcentaje_ahorro,
+        faltante=faltante
+    )
 
 # ================================
 # TRANSACCIONES

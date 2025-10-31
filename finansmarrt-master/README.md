@@ -33,7 +33,7 @@ Esto creará un entorno virtual llamado "venv".
 4 Activar el entorno virtual
 ----------------------------------
 - En Windows:
-
+ ES MEJOR HACERLO DESDE UNA CMD EXTERNA A VISUAL STUDIO O EL SOFTWARE QUE USA Y UNA VEZ AHI ENTRA ALA CARPETA CON EL CD Y LA RUTA UNA VEZ REALIZADO EJECTUAR EL VEN ACTIVATE Y INSTALAR LOS REQUERIMIENTOS 
     .\venv\Scripts\activate
 
 

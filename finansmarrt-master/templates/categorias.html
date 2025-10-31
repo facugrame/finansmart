@@ -13,6 +13,8 @@
   <div class="container">
     <a class="navbar-brand" href="{{ url_for('panel') }}">FinanSmart</a>
     <div class="ms-auto">
+      <a href="{{ url_for('agregar_transaccion') }}" class="btn btn-light me-2">Nueva Transacción</a>
+         <a href="{{ url_for('listar_transacciones') }}" class="btn btn-light me-2">Mis transacciones</a>
       <a href="{{ url_for('cerrar_sesion') }}" class="btn btn-outline-light">Cerrar sesión</a>
     </div>
   </div>

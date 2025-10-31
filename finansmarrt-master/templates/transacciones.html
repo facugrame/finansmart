@@ -19,6 +19,39 @@
     </div>
   </div>
 </nav>
+<!-- Toasts de notificaciones -->
+<div class="position-fixed top-0 end-0 p-3" style="z-index: 1050;">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for categoria, mensaje in messages %}
+      <div class="toast align-items-center text-white 
+           {% if categoria == 'success' %}bg-success{% elif categoria == 'error' %}bg-danger{% else %}bg-dark{% endif %} 
+           border-0 mb-2" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+          <div class="toast-body">
+            {{ mensaje }}
+          </div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+      </div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+</div>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var toastElList = [].slice.call(document.querySelectorAll('.toast'))
+  toastElList.map(function (toastEl) {
+    var t = new bootstrap.Toast(toastEl, { delay: 3000 })
+    t.show()
+    return t
+  })
+});
+</script>
+
+
   <div class="container mt-5">
     <h2>Mis Transacciones</h2>
     <table class="table table-striped">

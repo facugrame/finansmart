@@ -65,6 +65,50 @@
     {% endif %}
   </div>
 </div>
+<!-- Meta de Ahorro -->
+<div class="card shadow mt-4">
+  <div class="card-body">
+
+    <h5 class="card-title text-center">Meta de Ahorro</h5>
+
+    <form method="POST" action="{{ url_for('guardar_meta') }}" class="text-center">
+
+      <label class="form-label fw-bold">Tipo de meta</label>
+      <select name="tipo_meta" class="form-control" style="max-width: 200px; margin: auto;">
+        <option value="mensual" {% if current_user.tipo_meta == "mensual" %}selected{% endif %}>Mensual</option>
+        <option value="anual" {% if current_user.tipo_meta == "anual" %}selected{% endif %}>Anual</option>
+      </select>
+
+      <label class="form-label mt-2 fw-bold">Monto meta ($)</label>
+      <input type="number" name="meta_ahorro"
+             value="{% if current_user.tipo_meta == 'mensual' %}{{ current_user.meta_ahorro_mensual }}{% else %}{{ current_user.meta_ahorro_anual }}{% endif %}"
+             class="form-control" style="max-width:200px;margin:auto;">
+
+      <button class="btn btn-primary btn-sm mt-2">Guardar</button>
+    </form>
+
+    <p class="text-center mt-3">
+      Ahorro actual: <strong>${{ ahorro_actual }}</strong>
+    </p>
+
+    <div class="progress" style="height: 22px;">
+      <div class="progress-bar bg-success"
+           role="progressbar"
+           style="width: {{ porcentaje_ahorro }}%;">
+        {{ porcentaje_ahorro }}%
+      </div>
+    </div>
+
+    {% if porcentaje_ahorro >= 100 %}
+      <p class="text-success text-center mt-2 fw-bold">🎉 ¡Meta alcanzada, excelente!</p>
+    {% else %}
+      <p class="text-muted text-center mt-2">
+        Te faltan ${{ meta - ahorro_actual }} para tu meta 💪
+      </p>
+    {% endif %}
+  </div>
+</div>
+
 
   <!-- Gráfico de categorías -->
   <div class="card shadow">

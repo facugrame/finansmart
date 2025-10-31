@@ -8,6 +8,17 @@ class Usuario(db.Model, UserMixin):
     correo = db.Column(db.String(150), unique=True, nullable=False)
     contrasena = db.Column(db.String(200), nullable=False)
     activo = db.Column(db.Boolean, default=False)
+    meta_ahorro = db.Column(db.Integer, default=0)
+    # ✅ Metas de ahorro
+    meta_ahorro_mensual = db.Column(db.Integer, default=0)
+    meta_ahorro_anual = db.Column(db.Integer, default=0)
+
+    # ✅ Tipo de meta (mensual / anual)
+    tipo_meta = db.Column(db.String(10), default="mensual")
+
+    # ✅ Para no mandar email repetido
+    notificado_ahorro = db.Column(db.Boolean, default=False)
+
  
     
     transacciones = db.relationship('Transaccion', backref='usuario', lazy=True)
